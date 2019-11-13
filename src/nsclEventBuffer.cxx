@@ -47,7 +47,10 @@ void nsclEventBuffer::ReadEvent(nsclBuffer *buffer, eventData *data, bool verbos
 
 	//Loop over each module
 	for(unsigned int module=0;module<modules.size();module++) {
+	
+
 		if (!buffer->IsUSB() && !buffer->IsRingBuffer()) {
+
 			int packetLength = buffer->GetWord();
 			int packetTag = buffer->GetWord();
 			if (verbose) {
@@ -64,9 +67,17 @@ void nsclEventBuffer::ReadEvent(nsclBuffer *buffer, eventData *data, bool verbos
 		//	(This occurs when the module is not readout and the
 		//	 header and trailer are not written into the buffer)
 		if (buffer->IsUSB()) {
+			if (module==2) {
+			datum = buffer->GetTwoByteWord();
+			if (datum == 0xFFFF) boundaryWord = true;
+			buffer->RewindBytes(2);
+			}
+			else
+			{
 			datum = buffer->GetFourByteWord();
 			if (datum == 0xFFFFFFFF) boundaryWord = true;
 			buffer->RewindBytes(4);
+			}
 		}
 
 		//Read out the current module
@@ -80,8 +91,10 @@ void nsclEventBuffer::ReadEvent(nsclBuffer *buffer, eventData *data, bool verbos
 
 		//USB version has module boundary word of 0xffffffff
 		if (buffer->IsUSB()) {
+			if (module!=2){
 			int datum = buffer->GetFourByteWord();
 			if (verbose) printf("\t%#04x Boundary Word\n",datum);
+			}
 		}
 	}
 
@@ -116,7 +129,9 @@ UInt_t nsclEventBuffer::GetEventLength(nsclBuffer *buffer)
 	//A bad buffer may have a large event length.
 	if (eventLength > buffer->GetNumOfWords()) {
 		fflush(stdout);
+		
 		fprintf(stderr,"ERROR: Event Length (%u) larger than number of words in buffer (%u)! Skipping Buffer!\n",eventLength,buffer->GetNumOfWords());
+		std::cout << "ERROR: Event Length ("<< eventLength << ") larger than number of words in buffer (" << buffer->GetNumOfWords() <<")! Skipping Buffer!" << std::endl;
 		buffer->Forward(buffer->GetNumOfWords() - buffer->GetPosition());
 		return 0;
 	}
