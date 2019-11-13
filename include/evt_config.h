@@ -26,7 +26,7 @@
  * See modules/include for examples.
  */
 #define MODULE_LIST(MODULE) \
-	MODULE(Mesytec_ADC_MADC32) \
+	MODULE(Caen_General) \
 	MODULE(Caen_General) 
 
 #endif
