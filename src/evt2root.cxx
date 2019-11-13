@@ -5,7 +5,8 @@
 
 #include <vector>
 #include <unistd.h>
-
+#include "eventData.h"
+#include "eventScaler.h"
 #include "nsclBuffer.h"
 #include "nsclScalerBuffer.h"
 #include "nsclRunBuffer.h"
@@ -27,6 +28,7 @@ int main (int argc, char *argv[])
 	std::vector< const char* > inputFiles;
 	bool batchJob = false;
 	int c;
+	unsigned int scalerdataStartTime=0;
 	//Loop over options
 	while ((c = getopt(argc,argv,":o:b")) != -1) {
 		if (c=='o') outputFile = optarg;
@@ -71,12 +73,14 @@ int main (int argc, char *argv[])
 			if (buffer->GetBufferType() == BUFFER_TYPE_DATA) {
 				for (int i=0;i<buffer->GetNumOfEvents() && buffer->GetPosition() < buffer->GetNumOfWords();i++) {
 					eventBuffer->ReadEvent(buffer,data);
+					data->SetdataStartTime(scalerdataStartTime);
 					evtTree->Fill();
 				}
 			}
 			else if (buffer->GetBufferType() == BUFFER_TYPE_SCALERS) {
 				scalerBuffer->ReadScalers(buffer,scaler);
 				scalerTree->Fill();
+				scalerdataStartTime=scaler->scalerStartTime;
 			}
 			else if (buffer->GetBufferType() == BUFFER_TYPE_RUNBEGIN) {
 				//Some files have the start buffer written multiple times
