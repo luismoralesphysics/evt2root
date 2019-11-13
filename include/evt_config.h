@@ -27,7 +27,6 @@
  */
 #define MODULE_LIST(MODULE) \
 	MODULE(Caen_General) \
-	MODULE(Caen_General) 
-
+	MODULE(Caen_General) \
+	MODULE(Caen_IO_V977)
 #endif
-
